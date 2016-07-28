@@ -3,7 +3,7 @@
 # Install busybox
 /bin/busybox --install -s
 
-# Mount the /proc and /sys filesystems.
+# Mount /proc and /sys filesystems
 mount -t proc none /proc
 mount -t sysfs none /sys
 mount -t devtmpfs none /dev
@@ -17,18 +17,18 @@ cmdline() {
 }
 
 realboot() {
-        echo "Rootfs: $1";
-        # Mount real root.
+        echo "Rootfs: $1"
+        # Mount real root
         mkdir -p /mnt/root
         mount -o rw "$1" /mnt/root
 
         if [ -x /mnt/root/sbin/init -o -h /mnt/root/sbin/init ]; then
-                # Cleanup.
+                # Cleanup
                 umount /proc
                 umount /sys
                 umount /dev
 
-                # Boot the real system.
+                # Boot real system
                 exec switch_root /mnt/root /sbin/init
         else
                 umount /mnt/root
@@ -36,7 +36,7 @@ realboot() {
 }
 
 runshell() {
-        echo "Dropping to a shell."
+        echo "Dropping to shell"
         echo
         setsid cttyhack /bin/sh
 }
@@ -51,18 +51,19 @@ boot() {
         local kernel_root_param=$(cmdline root)
 
         while [ "$i" -ge 1 ]; do
-                echo "Waiting for root system $kernel_root_param, countdown : $i";
+                echo "Waiting for root system $kernel_root_param, countdown : $i"
                 local root=`find_parition_by_value $kernel_root_param`
                 if [ -e "$root" ]; then
-                        realboot $root;
-                fi;
+                        realboot $root
+                fi
 
-                i=$(( $i - 1 ));
-                sleep 5;
-        done;
+                i=$(( $i - 1 ))
+                sleep 5
+        done
 
         # Default rootfs - sd partition 2
-        realboot /dev/mmcblk0p2;
-        runshell;
+        realboot /dev/mmcblk0p2
+        runshell
 }
-boot;
+
+boot
